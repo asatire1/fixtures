@@ -306,9 +306,9 @@
                 { team1: [11, 15], team2: [14, 9] }
             ],
             3: [
-                { team1: [5, 18], team2: [13, 8] },      // Swapped match 1 & 5
+                { team1: [5, 18], team2: [13, 8] },
                 { team1: [2, 11], team2: [12, 3] },
-                { team1: [1, 10], team2: [9, 4] },       // Swapped match 1 & 5
+                { team1: [1, 10], team2: [9, 4] },
                 { team1: [6, 17], team2: [14, 7] },
                 { team1: [15, 24], team2: [19, 20] },
                 { team1: [16, 23], team2: [22, 21] }
@@ -354,8 +354,8 @@
                 { team1: [22, 18], team2: [15, 24] }
             ],
             9: [
-                { team1: [6, 12], team2: [11, 8] },      // Swapped match 2 & 7
-                { team1: [2, 24], team2: [17, 4] },      // Swapped match 2 & 7
+                { team1: [6, 12], team2: [11, 8] },
+                { team1: [2, 24], team2: [17, 4] },
                 { team1: [1, 19], team2: [18, 3] },
                 { team1: [5, 9], team2: [10, 7] },
                 { team1: [14, 20], team2: [21, 16] },
@@ -380,8 +380,8 @@
             12: [
                 { team1: [2, 16], team2: [13, 4] },
                 { team1: [5, 17], team2: [14, 1] },
-                { team1: [3, 22], team2: [15, 7] },      // Swapped match 6 & 4
-                { team1: [6, 24], team2: [21, 8] },      // Swapped match 6 & 4
+                { team1: [3, 22], team2: [15, 7] },
+                { team1: [6, 24], team2: [21, 8] },
                 { team1: [10, 18], team2: [23, 12] },
                 { team1: [9, 19], team2: [20, 11] }
             ],
@@ -395,6 +395,34 @@
             ]
         };
 
+        // ===== DEFAULT PLAYER NAMES =====
+        const DEFAULT_PLAYER_NAMES = [
+            'Bilal',
+            'Sohaib',
+            'Azam',
+            'Abdul',
+            'Asim Din',
+            'Arfat',
+            'Chris P',
+            'Zafar',
+            'Khal',
+            'Jacob',
+            'Sach',
+            'Shoaib',
+            'Darren',
+            'Tom B',
+            'Faizan',
+            'Tariq',
+            'Ziad',
+            'Ben Adamson',
+            'Ste Cotter',
+            'Jared',
+            'Basim',
+            'Mugsy',
+            'Moh',
+            'Amir'
+        ];
+
         // ===== STATE MANAGEMENT =====
         class TournamentState {
             constructor() {
@@ -402,13 +430,14 @@
             }
 
             loadFromStorage() {
+                // Calculate default ratings: 3.75 to 3.0 evenly distributed
                 const defaultRatings = {};
                 for (let i = 1; i <= 24; i++) {
-                    defaultRatings[i] = parseFloat((3.75 - (i - 1) * 0.043478).toFixed(2));
+                    // Linear interpolation from 3.75 (player 1) to 3.0 (player 24)
+                    defaultRatings[i] = parseFloat((3.75 - ((i - 1) * 0.75 / 23)).toFixed(2));
                 }
 
-                this.playerNames = JSON.parse(localStorage.getItem('padel_player_names')) || 
-                    Array.from({length: 24}, (_, i) => `Player ${i + 1}`);
+                this.playerNames = JSON.parse(localStorage.getItem('padel_player_names')) || [...DEFAULT_PLAYER_NAMES];
                 
                 this.skillRatings = JSON.parse(localStorage.getItem('padel_skill_ratings')) || defaultRatings;
                 this.matchScores = JSON.parse(localStorage.getItem('padel_match_scores')) || {};
@@ -625,10 +654,10 @@
             }
 
             resetPlayerNames() {
-                this.playerNames = Array.from({length: 24}, (_, i) => `Player ${i + 1}`);
+                this.playerNames = [...DEFAULT_PLAYER_NAMES];
                 const defaultRatings = {};
                 for (let i = 1; i <= 24; i++) {
-                    defaultRatings[i] = parseFloat((3.75 - (i - 1) * 0.043478).toFixed(2));
+                    defaultRatings[i] = parseFloat((3.75 - ((i - 1) * 0.75 / 23)).toFixed(2));
                 }
                 this.skillRatings = defaultRatings;
                 this.saveToStorage();
@@ -860,8 +889,8 @@
                                             </div>
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 mb-1">Skill Rating:</label>
-                                                <input type="number" min="0" max="5" step="0.05" value="${state.skillRatings[playerId]}" class="w-full border rounded px-3 py-2" onchange="state.updateSkillRating(${playerId}, parseFloat(this.value)); render();" />
-                                                <div class="text-xs text-gray-500 mt-1">(0-5, step 0.05)</div>
+                                                <input type="number" min="0" max="5" step="0.01" value="${state.skillRatings[playerId]}" class="w-full border rounded px-3 py-2" onchange="state.updateSkillRating(${playerId}, parseFloat(this.value)); render();" />
+                                                <div class="text-xs text-gray-500 mt-1">(0-5, step 0.01)</div>
                                             </div>
                                         </div>
                                     </div>
