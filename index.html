@@ -306,12 +306,12 @@
                 { team1: [11, 15], team2: [14, 9] }
             ],
             3: [
-                { team1: [5, 18], team2: [13, 8] },      // Match 1 - Asim (5) instead of Bilal (1)
-                { team1: [2, 11], team2: [12, 3] },      // Match 2
-                { team1: [1, 10], team2: [9, 4] },       // Match 3 - Bilal (1) instead of Asim (5) - SWAPPED WITH MATCH 1
-                { team1: [6, 17], team2: [14, 7] },      // Match 4
-                { team1: [15, 24], team2: [19, 20] },    // Match 5
-                { team1: [16, 23], team2: [22, 21] }     // Match 6
+                { team1: [5, 18], team2: [13, 8] },      // Swapped: 1→5 (Asim instead of Bilal)
+                { team1: [2, 11], team2: [12, 3] },
+                { team1: [1, 10], team2: [9, 4] },       // Swapped: 5→1 (Bilal instead of Asim)
+                { team1: [6, 17], team2: [14, 7] },
+                { team1: [15, 24], team2: [19, 20] },
+                { team1: [16, 23], team2: [22, 21] }
             ],
             4: [
                 { team1: [1, 21], team2: [17, 2] },
@@ -354,12 +354,12 @@
                 { team1: [22, 18], team2: [15, 24] }
             ],
             9: [
-                { team1: [6, 12], team2: [11, 8] },      // Match 1 - Arfat (6) instead of Sohaib (2) - SWAPPED WITH MATCH 2
-                { team1: [2, 24], team2: [17, 4] },      // Match 2 - Sohaib (2) instead of Arfat (6)
-                { team1: [1, 19], team2: [18, 3] },      // Match 3
-                { team1: [5, 9], team2: [10, 7] },       // Match 4
-                { team1: [14, 20], team2: [21, 16] },    // Match 5
-                { team1: [13, 23], team2: [22, 15] }     // Match 6
+                { team1: [7, 12], team2: [11, 8] },      // Swapped: 2→7, 6→2 (Chris P instead of Sohaib, and Sohaib in match 2)
+                { team1: [2, 24], team2: [17, 4] },      // Swapped: 6→2 (Sohaib instead of Arfat)
+                { team1: [1, 19], team2: [18, 3] },
+                { team1: [5, 9], team2: [10, 6] },       // Swapped: 7→6 (Arfat instead of Chris P)
+                { team1: [14, 20], team2: [21, 16] },
+                { team1: [13, 23], team2: [22, 15] }
             ],
             10: [
                 { team1: [2, 23], team2: [15, 5] },
@@ -378,12 +378,12 @@
                 { team1: [24, 4], team2: [19, 17] }
             ],
             12: [
-                { team1: [2, 16], team2: [13, 4] },      // Match 1
-                { team1: [5, 17], team2: [14, 1] },      // Match 2
-                { team1: [3, 22], team2: [15, 7] },      // Match 3 - SWAPPED WITH MATCH 6
-                { team1: [6, 24], team2: [21, 8] },      // Match 4 - SWAPPED WITH MATCH 6
-                { team1: [10, 18], team2: [23, 12] },    // Match 5
-                { team1: [9, 19], team2: [20, 11] }      // Match 6
+                { team1: [2, 16], team2: [13, 6] },      // Swapped: 4→6 (Arfat instead of Abdul)
+                { team1: [5, 17], team2: [14, 1] },
+                { team1: [3, 22], team2: [15, 4] },      // Swapped: 6→4, 7→4 (Abdul instead of Arfat)
+                { team1: [7, 24], team2: [21, 8] },      // Swapped: 6→7 (Chris P instead of Arfat)
+                { team1: [10, 18], team2: [23, 12] },
+                { team1: [9, 19], team2: [20, 11] }
             ],
             13: [
                 { team1: [2, 8], team2: [5, 4] },
@@ -736,7 +736,7 @@
                 </div>
             `;
         }
-function MatchCard(round, matchIdx, match) {
+        function MatchCard(round, matchIdx, match) {
             const within = isWithinGroup(match);
             const score = getMatchScore(round, matchIdx);
             const isComplete = isMatchComplete(round, matchIdx);
