@@ -306,9 +306,9 @@
                 { team1: [11, 15], team2: [14, 9] }
             ],
             3: [
-                { team1: [1, 10], team2: [9, 4] },
+                { team1: [5, 18], team2: [13, 8] },      // Swapped match 1 & 5
                 { team1: [2, 11], team2: [12, 3] },
-                { team1: [5, 18], team2: [13, 8] },
+                { team1: [1, 10], team2: [9, 4] },       // Swapped match 1 & 5
                 { team1: [6, 17], team2: [14, 7] },
                 { team1: [15, 24], team2: [19, 20] },
                 { team1: [16, 23], team2: [22, 21] }
@@ -354,9 +354,9 @@
                 { team1: [22, 18], team2: [15, 24] }
             ],
             9: [
-                { team1: [2, 24], team2: [17, 4] },
+                { team1: [6, 12], team2: [11, 8] },      // Swapped match 2 & 7
+                { team1: [2, 24], team2: [17, 4] },      // Swapped match 2 & 7
                 { team1: [1, 19], team2: [18, 3] },
-                { team1: [6, 12], team2: [11, 8] },
                 { team1: [5, 9], team2: [10, 7] },
                 { team1: [14, 20], team2: [21, 16] },
                 { team1: [13, 23], team2: [22, 15] }
@@ -380,8 +380,8 @@
             12: [
                 { team1: [2, 16], team2: [13, 4] },
                 { team1: [5, 17], team2: [14, 1] },
-                { team1: [6, 24], team2: [21, 8] },
-                { team1: [3, 22], team2: [15, 7] },
+                { team1: [3, 22], team2: [15, 7] },      // Swapped match 6 & 4
+                { team1: [6, 24], team2: [21, 8] },      // Swapped match 6 & 4
                 { team1: [10, 18], team2: [23, 12] },
                 { team1: [9, 19], team2: [20, 11] }
             ],
@@ -420,7 +420,7 @@
                 this.savedVersions = JSON.parse(localStorage.getItem('padel_saved_versions')) || [];
                 
                 this.currentTab = 'fixtures';
-                this.settingsSubTab = 'players'; // New subtab state
+                this.settingsSubTab = 'players';
                 this.filterRound = 'all';
                 this.filterPlayer = 'all';
             }
@@ -497,24 +497,19 @@
                 this.saveToStorage();
             }
 
-            // NEW: Smart fixture update with auto-swap
             updateFixtureWithSwap(round, matchIdx, position, oldValue, newValue) {
                 const match = this.fixtures[round][matchIdx];
                 
-                // Check if newValue already exists in this round
                 const playersInRound = [];
                 this.fixtures[round].forEach((m, idx) => {
                     playersInRound.push(...m.team1, ...m.team2);
                 });
                 
-                // If newValue is already in the round, find it and swap
                 if (playersInRound.includes(newValue)) {
-                    // Find where newValue is located
                     this.fixtures[round].forEach((m, idx) => {
                         ['team1', 'team2'].forEach(team => {
                             [0, 1].forEach(pos => {
                                 if (m[team][pos] === newValue) {
-                                    // Swap: put oldValue where newValue was
                                     this.fixtures[round][idx][team][pos] = oldValue;
                                 }
                             });
@@ -522,7 +517,6 @@
                     });
                 }
                 
-                // Now update the original position with newValue
                 if (position === 't1p1') match.team1[0] = newValue;
                 else if (position === 't1p2') match.team1[1] = newValue;
                 else if (position === 't2p1') match.team2[0] = newValue;
@@ -983,7 +977,6 @@
 
             return `
                 <div class="space-y-6">
-                    <!-- Sub-tabs -->
                     <div class="bg-white rounded-2xl shadow-sm p-3 border border-gray-100">
                         <div class="flex gap-2 flex-wrap">
                             ${subtabs.map(tab => `
@@ -996,8 +989,6 @@
                             `).join('')}
                         </div>
                     </div>
-                    
-                    <!-- Content -->
                     ${content}
                 </div>
             `;
@@ -1547,16 +1538,13 @@
                 return;
             }
             
-            // Check if all 4 players are unique
             const match = state.fixtures[round][matchIdx];
             const players = [...match.team1, ...match.team2];
             
-            // Replace old value with new value in the temp array
             const posMap = { 't1p1': 0, 't1p2': 1, 't2p1': 2, 't2p2': 3 };
             const tempPlayers = [...players];
             tempPlayers[posMap[position]] = newValue;
             
-            // Check for duplicates within the match
             const uniqueInMatch = new Set(tempPlayers);
             if (uniqueInMatch.size !== 4) {
                 alert('All 4 players in a match must be different!');
@@ -1564,7 +1552,6 @@
                 return;
             }
             
-            // Use smart swap method
             state.updateFixtureWithSwap(round, matchIdx, position, oldValue, newValue);
             render();
         }
