@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streford Padel Tournament</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        .tier-elite { background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%); }
+        .tier-advanced { background: linear-gradient(135deg, #EA580C 0%, #C2410C 100%); }
+        .tier-intermediate-plus { background: linear-gradient(135deg, #CA8A04 0%, #A16207 100%); }
+        .tier-intermediate { background: linear-gradient(135deg, #16A34A 0%, #15803D 100%); }
+        .tier-beginner-plus { background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); }
+        .tier-beginner { background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%); }
+        
+        .match-within { 
+            border-left: 3px solid #7C3AED;
+            background: linear-gradient(to right, rgba(124, 58, 237, 0.02), transparent);
+        }
+        .match-cross { 
+            border-left: 3px solid #16A34A;
+            background: linear-gradient(to right, rgba(22, 163, 74, 0.02), transparent);
+        }
+        
+        .tab-active { 
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        .tab-inactive { 
+            background: transparent;
+            color: #6B7280;
+        }
+        
+        /* HIDE FAIRNESS TABS */
+        button[onclick*="fairness"] {
+            display: none !important;
+        }
+        
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            opacity: 1;
+            height: 40px;
+        }
+        
+        /* Apple-style Match Cards */
+        .match-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+        
+        .match-card:hover {
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+        
+        .match-card.complete {
+            background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+            border-color: rgba(22, 163, 74, 0.2);
+        }
+        
+        .score-input {
+            font-size: 1.75rem;
+            font-weight: 600;
+            text-align: center;
+            border: none;
+            background: rgba(0, 0, 0, 0.03);
+            border-radius: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 70px;
+            height: 70px;
+            color: #1F2937;
+        }
+        
+        .score-input:focus {
+            outline: none;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1), 0 8px 16px rgba(0, 0, 0, 0.1);
+            transform: scale(1.05);
+        }
+        
+        .score-input::placeholder {
+            color: #D1D5DB;
+            font-weight: 400;
+        }
+        
+        .score-divider {
+            font-size: 2rem;
+            font-weight: 300;
+            color: #D1D5DB;
+        }
+        
+        .player-badge-enhanced {
+            padding: 8px 14px;
+            border-radius: 100px;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-width: 140px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .player-badge-enhanced:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .match-type-badge {
+            font-size: 0.6875rem;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 100px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .winner-banner {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+            padding: 12px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+            border-radius: 14px;
+            margin-top: 12px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 0.3px;
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .clear-score-btn {
+            background: rgba(239, 68, 68, 0.1);
+            color: #DC2626;
+            border: none;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .clear-score-btn:hover {
+            background: #FEE2E2;
+            transform: scale(1.1) rotate(90deg);
+        }
+        
+        .clear-score-btn:active {
+            transform: scale(0.95) rotate(90deg);
+        }
+        
+        .filter-section {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+        
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 20px;
+            padding-right: 40px;
+        }
+        
+        .round-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+        
+        .round-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .fixture-input {
+            width: 50px;
+            text-align: center;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 6px;
+            font-size: 0.875rem;
+        }
+        
+        .fixture-input:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .settings-subtab {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .settings-subtab.active {
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+        
+        .settings-subtab.inactive {
+            background: #F3F4F6;
+            color: #6B7280;
+        }
+        
+        .settings-subtab.inactive:hover {
+            background: #E5E7EB;
+        }
+        
+        /* Custom scrollbar for fairness rounds */
+        .overflow-x-auto::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .overflow-x-auto::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+        }
+        
+        .overflow-x-auto::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        
+        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        @media (max-width: 640px) {
+            .score-input {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+            
+            .match-card {
+                border-radius: 16px;
+            }
+            
+            .player-badge-enhanced {
+                min-width: 120px;
+                font-size: 0.75rem;
+                padding: 6px 12px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 via-white to-gray-50 min-h-screen">
+    <div id="app"></div>
+
+    <script>
+        // ===== DEFAULT FIXTURES DATA =====
+        const DEFAULT_FIXTURES = {
+            1: [
+                { team1: [1, 4], team2: [2, 3] },
+                { team1: [5, 8], team2: [6, 7] },
+                { team1: [9, 12], team2: [10, 11] },
+                { team1: [13, 16], team2: [14, 15] },
+                { team1: [17, 20], team2: [18, 19] },
+                { team1: [21, 24], team2: [22, 23] }
+            ],
+            2: [
+                { team1: [1, 24], team2: [10, 16] },
+                { team1: [2, 23], team2: [6, 19] },
+                { team1: [3, 22], team2: [7, 18] },
+                { team1: [4, 21], team2: [8, 17] },
+                { team1: [5, 20], team2: [13, 12] },
+                { team1: [11, 15], team2: [14, 9] }
+            ],
+            3: [
+                { team1: [1, 9], team2: [13, 8] },
+                { team1: [2, 11], team2: [12, 3] },
+                { team1: [5, 10], team2: [18, 4] },
+                { team1: [6, 17], team2: [14, 7] },
+                { team1: [15, 24], team2: [19, 20] },
+                { team1: [16, 23], team2: [22, 21] }
+            ],
+            4: [
+                { team1: [1, 21], team2: [17, 2] },
+                { team1: [6, 18], team2: [19, 3] },
+                { team1: [5, 12], team2: [9, 8] },
+                { team1: [4, 11], team2: [10, 7] },
+                { team1: [13, 24], team2: [20, 16] },
+                { team1: [14, 23], team2: [22, 15] }
+            ],
+            5: [
+                { team1: [2, 16], team2: [13, 4] },
+                { team1: [5, 17], team2: [14, 1] },
+                { team1: [7, 22], team2: [15, 4] },
+                { team1: [3, 24], team2: [21, 8] },
+                { team1: [10, 18], team2: [23, 12] },
+                { team1: [9, 19], team2: [20, 11] }
+            ],
+            6: [
+                { team1: [2, 24], team2: [5, 20] },
+                { team1: [4, 23], team2: [6, 19] },
+                { team1: [1, 22], team2: [7, 18] },
+                { team1: [3, 21], team2: [8, 17] },
+                { team1: [15, 16], team2: [13, 12] },
+                { team1: [9, 11], team2: [14, 10] }
+            ],
+            7: [
+                { team1: [5, 12], team2: [9, 4] },
+                { team1: [1, 13], team2: [8, 2] },
+                { team1: [6, 16], team2: [11, 10] },
+                { team1: [3, 17], team2: [14, 7] },
+                { team1: [21, 19], team2: [23, 20] },
+                { team1: [22, 18], team2: [15, 24] }
+            ],
+            8: [
+                { team1: [12, 22], team2: [16, 20] },
+                { team1: [1, 23], team2: [6, 11] },
+                { team1: [2, 9], team2: [7, 8] },
+                { team1: [3, 21], team2: [5, 13] },
+                { team1: [10, 18], team2: [14, 15] },
+                { team1: [24, 4], team2: [19, 17] }
+            ],
+            9: [
+                { team1: [2, 23], team2: [15, 5] },
+                { team1: [1, 22], team2: [13, 20] },
+                { team1: [18, 4], team2: [9, 8] },
+                { team1: [12, 14], team2: [19, 7] },
+                { team1: [3, 24], team2: [10, 17] },
+                { team1: [11, 16], team2: [6, 21] }
+            ],
+            10: [
+                { team1: [2, 12], team2: [11, 8] },
+                { team1: [7, 24], team2: [17, 4] },
+                { team1: [1, 19], team2: [18, 3] },
+                { team1: [5, 9], team2: [10, 6] },
+                { team1: [14, 20], team2: [21, 16] },
+                { team1: [13, 23], team2: [22, 15] }
+            ],
+            11: [
+                { team1: [2, 8], team2: [5, 4] },
+                { team1: [3, 7], team2: [6, 1] },
+                { team1: [10, 24], team2: [21, 12] },
+                { team1: [9, 23], team2: [15, 11] },
+                { team1: [14, 20], team2: [17, 16] },
+                { team1: [13, 19], team2: [18, 22] }
+            ],
+            12: [
+                { team1: [1, 12], team2: [5, 4] },
+                { team1: [2, 7], team2: [6, 3] },
+                { team1: [9, 20], team2: [21, 8] },
+                { team1: [10, 23], team2: [22, 11] },
+                { team1: [13, 24], team2: [17, 18] },
+                { team1: [14, 19], team2: [16, 15] }
+            ],
+            13: [
+                { team1: [4, 14], team2: [13, 1] },
+                { team1: [2, 16], team2: [15, 3] },
+                { team1: [6, 24], team2: [21, 10] },
+                { team1: [5, 23], team2: [11, 7] },
+                { team1: [8, 22], team2: [17, 12] },
+                { team1: [9, 19], team2: [18, 20] }
+            ]
+        };
+
+        // ===== DEFAULT PLAYER NAMES =====
+        const DEFAULT_PLAYER_NAMES = [
+            'Bilal',        // #1
+            'Sohaib',       // #2
+            'Azam',         // #3
+            'Abdul',        // #4
+            'Asim Din',     // #5
+            'Arfat',        // #6
+            'Chris P',      // #7
+            'Zafar',        // #8
+            'Khal',         // #9
+            'Jacob',        // #10
+            'Sach',         // #11
+            'Shoaib',       // #12
+            'Darren',       // #13
+            'Yousaf',       // #14
+            'Tom B',        // #15
+            'Faizan',       // #16
+            'Tariq',        // #17
+            'Ben Adamson',  // #18
+            'Ste Cotter',   // #19
+            'Jared',        // #20
+            'Basim',        // #21
+            'Mugsy',        // #22
+            'Moh',          // #23
+            'Amir'          // #24
+        ];
+
+        // ===== STATE MANAGEMENT =====
+        class TournamentState {
+            constructor() {
+                this.loadFromStorage();
+            }
+
+            loadFromStorage() {
+                // Calculate default ratings: 3.75 to 3.0 evenly distributed
+                const defaultRatings = {};
+                for (let i = 1; i <= 24; i++) {
+                    // Linear interpolation from 3.75 (player 1) to 3.0 (player 24)
+                    defaultRatings[i] = parseFloat((3.75 - ((i - 1) * 0.75 / 23)).toFixed(2));
+                }
+
+                this.playerNames = JSON.parse(localStorage.getItem('padel_player_names')) || [...DEFAULT_PLAYER_NAMES];
+                
+                this.skillRatings = JSON.parse(localStorage.getItem('padel_skill_ratings')) || defaultRatings;
+                this.matchScores = JSON.parse(localStorage.getItem('padel_match_scores')) || {};
+                this.fixtures = JSON.parse(localStorage.getItem('padel_fixtures')) || JSON.parse(JSON.stringify(DEFAULT_FIXTURES));
+                this.knockoutScores = JSON.parse(localStorage.getItem('padel_knockout_scores')) || {};
+                this.knockoutMaxScore = parseInt(localStorage.getItem('padel_knockout_max_score')) || 16;
+                this.semiMaxScore = parseInt(localStorage.getItem('padel_semi_max_score')) || 16;
+                this.finalMaxScore = parseInt(localStorage.getItem('padel_final_max_score')) || 16;
+                this.savedVersions = JSON.parse(localStorage.getItem('padel_saved_versions')) || [];
+                
+                this.currentTab = 'fixtures';
+                this.settingsSubTab = 'players';
+                this.filterRound = 'all';
+                this.filterPlayer = 'all';
+            }
+
+            saveToStorage() {
+                localStorage.setItem('padel_player_names', JSON.stringify(this.playerNames));
+                localStorage.setItem('padel_skill_ratings', JSON.stringify(this.skillRatings));
+                localStorage.setItem('padel_match_scores', JSON.stringify(this.matchScores));
+                localStorage.setItem('padel_fixtures', JSON.stringify(this.fixtures));
+                localStorage.setItem('padel_knockout_scores', JSON.stringify(this.knockoutScores));
+                localStorage.setItem('padel_knockout_max_score', this.knockoutMaxScore.toString());
+                localStorage.setItem('padel_semi_max_score', this.semiMaxScore.toString());
+                localStorage.setItem('padel_final_max_score', this.finalMaxScore.toString());
+                localStorage.setItem('padel_saved_versions', JSON.stringify(this.savedVersions));
+            }
+
+            updatePlayerName(index, name) {
+                this.playerNames[index] = name;
+                this.saveToStorage();
+            }
+
+            updateSkillRating(playerId, rating) {
+                this.skillRatings[playerId] = rating;
+                this.saveToStorage();
+            }
+
+            updateMatchScore(round, match, team1Score, team2Score) {
+                if (!this.matchScores[round]) {
+                    this.matchScores[round] = {};
+                }
+                this.matchScores[round][match] = { team1Score, team2Score };
+                this.saveToStorage();
+            }
+
+            clearMatchScore(round, match) {
+                if (this.matchScores[round] && this.matchScores[round][match]) {
+                    delete this.matchScores[round][match];
+                    this.saveToStorage();
+                }
+            }
+
+            updateKnockoutScore(matchId, team1Score, team2Score) {
+                this.knockoutScores[matchId] = { team1Score, team2Score };
+                this.saveToStorage();
+            }
+
+            clearKnockoutScore(matchId) {
+                if (this.knockoutScores[matchId]) {
+                    delete this.knockoutScores[matchId];
+                    this.saveToStorage();
+                }
+            }
+
+            updateKnockoutMaxScore(value) {
+                this.knockoutMaxScore = value;
+                this.saveToStorage();
+            }
+
+            updateSemiMaxScore(value) {
+                this.semiMaxScore = value;
+                this.saveToStorage();
+            }
+
+            updateFinalMaxScore(value) {
+                this.finalMaxScore = value;
+                this.saveToStorage();
+            }
+
+            updateFixture(round, matchIdx, team1p1, team1p2, team2p1, team2p2) {
+                this.fixtures[round][matchIdx] = {
+                    team1: [parseInt(team1p1), parseInt(team1p2)],
+                    team2: [parseInt(team2p1), parseInt(team2p2)]
+                };
+                this.saveToStorage();
+            }
+
+            updateFixtureWithSwap(round, matchIdx, position, oldValue, newValue) {
+                const match = this.fixtures[round][matchIdx];
+                
+                const playersInRound = [];
+                this.fixtures[round].forEach((m, idx) => {
+                    playersInRound.push(...m.team1, ...m.team2);
+                });
+                
+                if (playersInRound.includes(newValue)) {
+                    this.fixtures[round].forEach((m, idx) => {
+                        ['team1', 'team2'].forEach(team => {
+                            [0, 1].forEach(pos => {
+                                if (m[team][pos] === newValue) {
+                                    this.fixtures[round][idx][team][pos] = oldValue;
+                                }
+                            });
+                        });
+                    });
+                }
+                
+                if (position === 't1p1') match.team1[0] = newValue;
+                else if (position === 't1p2') match.team1[1] = newValue;
+                else if (position === 't2p1') match.team2[0] = newValue;
+                else if (position === 't2p2') match.team2[1] = newValue;
+                
+                this.saveToStorage();
+            }
+
+            resetFixtures() {
+                this.fixtures = JSON.parse(JSON.stringify(DEFAULT_FIXTURES));
+                this.saveToStorage();
+            }
+
+            exportFixtures() {
+                return JSON.stringify(this.fixtures, null, 2);
+            }
+
+            importFixtures(fixturesJson) {
+                try {
+                    const parsed = JSON.parse(fixturesJson);
+                    this.fixtures = parsed;
+                    this.saveToStorage();
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            }
+
+            resetAllScores() {
+                this.createBackup('Auto-backup before reset');
+                this.matchScores = {};
+                this.saveToStorage();
+            }
+
+            createBackup(name) {
+                const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+                const backup = {
+                    id: Date.now(),
+                    name: name || `Backup ${timestamp}`,
+                    timestamp: timestamp,
+                    playerNames: [...this.playerNames],
+                    skillRatings: {...this.skillRatings},
+                    matchScores: JSON.parse(JSON.stringify(this.matchScores)),
+                    fixtures: JSON.parse(JSON.stringify(this.fixtures)),
+                    knockoutScores: JSON.parse(JSON.stringify(this.knockoutScores)),
+                    knockoutMaxScore: this.knockoutMaxScore,
+                    semiMaxScore: this.semiMaxScore,
+                    finalMaxScore: this.finalMaxScore
+                };
+                
+                this.savedVersions.unshift(backup);
+                if (this.savedVersions.length > 10) {
+                    this.savedVersions = this.savedVersions.slice(0, 10);
+                }
+                this.saveToStorage();
+                return backup;
+            }
+
+            loadVersion(versionId) {
+                const version = this.savedVersions.find(v => v.id === versionId);
+                if (version) {
+                    this.createBackup('Auto-backup before load');
+                    this.playerNames = [...version.playerNames];
+                    this.skillRatings = {...version.skillRatings};
+                    this.matchScores = JSON.parse(JSON.stringify(version.matchScores));
+                    if (version.fixtures) this.fixtures = JSON.parse(JSON.stringify(version.fixtures));
+                    if (version.knockoutScores) this.knockoutScores = JSON.parse(JSON.stringify(version.knockoutScores));
+                    if (version.knockoutMaxScore) this.knockoutMaxScore = version.knockoutMaxScore;
+                    if (version.semiMaxScore) this.semiMaxScore = version.semiMaxScore;
+                    if (version.finalMaxScore) this.finalMaxScore = version.finalMaxScore;
+                    this.saveToStorage();
+                }
+            }
+
+            deleteVersion(versionId) {
+                this.savedVersions = this.savedVersions.filter(v => v.id !== versionId);
+                this.saveToStorage();
+            }
+
+            exportData() {
+                return {
+                    exportDate: new Date().toISOString(),
+                    playerNames: this.playerNames,
+                    skillRatings: this.skillRatings,
+                    matchScores: this.matchScores,
+                    fixtures: this.fixtures,
+                    knockoutScores: this.knockoutScores,
+                    knockoutMaxScore: this.knockoutMaxScore,
+                    semiMaxScore: this.semiMaxScore,
+                    finalMaxScore: this.finalMaxScore,
+                    savedVersions: this.savedVersions
+                };
+            }
+
+            importData(data) {
+                if (data.playerNames) this.playerNames = data.playerNames;
+                if (data.skillRatings) this.skillRatings = data.skillRatings;
+                if (data.matchScores) this.matchScores = data.matchScores;
+                if (data.fixtures) this.fixtures = data.fixtures;
+                if (data.knockoutScores) this.knockoutScores = data.knockoutScores;
+                if (data.knockoutMaxScore) this.knockoutMaxScore = data.knockoutMaxScore;
+                if (data.semiMaxScore) this.semiMaxScore = data.semiMaxScore;
+                if (data.finalMaxScore) this.finalMaxScore = data.finalMaxScore;
+                if (data.savedVersions) this.savedVersions = data.savedVersions;
+                this.saveToStorage();
+            }
+
+            resetPlayerNames() {
+                this.playerNames = [...DEFAULT_PLAYER_NAMES];
+                const defaultRatings = {};
+                for (let i = 1; i <= 24; i++) {
+                    defaultRatings[i] = parseFloat((3.75 - ((i - 1) * 0.75 / 23)).toFixed(2));
+                }
+                this.skillRatings = defaultRatings;
+                this.saveToStorage();
+            }
+        }
+
+        const state = new TournamentState();
+
+        // ===== UTILITY FUNCTIONS =====
+        function getTier(playerId) {
+            if (playerId >= 1 && playerId <= 4) return 'elite';
+            if (playerId >= 5 && playerId <= 8) return 'advanced';
+            if (playerId >= 9 && playerId <= 12) return 'intermediate-plus';
+            if (playerId >= 13 && playerId <= 16) return 'intermediate';
+            if (playerId >= 17 && playerId <= 20) return 'beginner-plus';
+            return 'beginner';
+        }
+
+        function getTierName(playerId) {
+            const tier = getTier(playerId);
+            const names = {
+                'elite': 'Elite',
+                'advanced': 'Advanced',
+                'intermediate-plus': 'Intermediate+',
+                'intermediate': 'Intermediate',
+                'beginner-plus': 'Beginner+',
+                'beginner': 'Beginner'
+            };
+            return names[tier];
+        }
+
+        function isWithinGroup(match) {
+            const allPlayers = [...match.team1, ...match.team2];
+            const tier = getTier(allPlayers[0]);
+            return allPlayers.every(p => getTier(p) === tier);
+        }
+
+        function getMatchScore(round, matchIdx) {
+            return state.matchScores[round]?.[matchIdx] || { team1Score: null, team2Score: null };
+        }
+
+        function isMatchComplete(round, matchIdx) {
+            const score = getMatchScore(round, matchIdx);
+            return score.team1Score !== null && score.team2Score !== null;
+        }
+
+        function getWinner(round, matchIdx) {
+            const score = getMatchScore(round, matchIdx);
+            if (score.team1Score === null || score.team2Score === null) return null;
+            if (score.team1Score > score.team2Score) return 'team1';
+            if (score.team2Score > score.team1Score) return 'team2';
+            return 'draw';
+        }
+
+        function countCompletedMatches() {
+            let count = 0;
+            for (let round = 1; round <= 13; round++) {
+                for (let match = 0; match < 6; match++) {
+                    if (isMatchComplete(round, match)) count++;
+                }
+            }
+            return count;
+        }
+
+        // ===== COMPONENTS =====
+        function PlayerBadge(playerId, showRating = false) {
+            const tier = getTier(playerId);
+            const name = state.playerNames[playerId - 1];
+            const rating = state.skillRatings[playerId];
+            
+            return `
+                <div class="player-badge-enhanced text-white tier-${tier}">
+                    <span class="font-bold">#${playerId}</span>
+                    <span>${name}</span>
+                    ${showRating ? `<span class="opacity-90 text-xs">(${rating})</span>` : ''}
+                </div>
+            `;
+        }
